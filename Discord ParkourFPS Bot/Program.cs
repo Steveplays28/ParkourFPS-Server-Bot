@@ -55,7 +55,7 @@ namespace Discord_ParkourFPS_Bot
                     //Help command
                     if (message_lowercase == Prefix + "help")
                     {
-                        await message.Channel.SendMessageAsync("Hello, I don't give help!");
+                        await message.Channel.SendMessageAsync("Hello @"+message.Author+", soon you'll be able to play a game with me!");
                     }
                 }
             }
