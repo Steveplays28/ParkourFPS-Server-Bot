@@ -7,28 +7,37 @@ namespace Discord_ParkourFPS_Bot
 {
     public class Program
     {
-        //Prefix variable
-        public string Prefix = "~";
-
-        //Bot startup variables
+        //Global variables
         private DiscordSocketClient client;
+        private readonly string Prefix = "~";
+        private SocketGuild parkourfps_server;
+        private SocketGuildUser steveplays;
+        private SocketTextChannel rules_and_info;
+
+        //Main static void
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
         //Bot initialisation
         public async Task MainAsync()
         {
+            //Get the client and store it in the "client" variable
             client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Info
             });
 
+            //Tasks
             client.Log += Log;
             client.MessageReceived += MessageReceived;
             client.UserJoined += UserJoined;
             client.Ready += ClientReady;
+            client.ReactionAdded += ReactionAdded;
+            client.ReactionRemoved += ReactionRemoved;
 
+            //Store bot token
             Environment.SetEnvironmentVariable("DiscordToken", "NzYxMTg2MjM1MjYyOTU5NjQ5.X3W77A.0Lhchw_1BFU0DRsRzz8X_KCQ62E");
 
+            //Start initialisation with bot token
             await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DiscordToken"));
             await client.StartAsync();
 
@@ -42,21 +51,22 @@ namespace Discord_ParkourFPS_Bot
             return Task.CompletedTask;
         }
 
+        //On bot ready
         private async Task ClientReady()
         {
             //Set bot status
-            await client.SetActivityAsync(new Game("Sneakily playing games..."/*,type: ActivityType.CustomStatus*/));
+            await client.SetGameAsync("user commands!", streamUrl: "", type: ActivityType.Listening);
             Console.WriteLine("I should've set my status now...");
+
+            //Set global variables
+            parkourfps_server = client.GetGuild(746681304111906867);
+            steveplays = parkourfps_server.GetUser(746088882461737111);
+            rules_and_info = parkourfps_server.GetTextChannel(746697885248258078);
         }
 
         //On message received
         private async Task MessageReceived(SocketMessage message)
         {
-            if(message_lowercase.Contains("you are bad"))
-            {
-                await message.Channel.SendMessageAsync(message_author + "test");
-            }
-            
             //Checks if the message author is not a bot or a webhook
             if (message.Author.IsBot == false && message.Author.IsWebhook == false)
             {
@@ -68,27 +78,86 @@ namespace Discord_ParkourFPS_Bot
                     {
                         //Sets message to lowercase and stores it to message_lowercase
                         string message_lowercase = message.Content.ToLower();
+
                         //Gets the message author in a mentionable way
-                        string message_author = message.Author.Mention;
+                        string message_author_mention = message.Author.Mention;
 
                         //Help command
                         if (message_lowercase.Contains(Prefix + "help"))
                         {
-                            await message.Channel.SendMessageAsync("Hello " + message_author + ", soon you'll be able to play a game with me!");
+                            await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", soon you'll be able to play a game with me!");
                         }
-                        
+
                     }
                 }
             }
         }
 
+        //On user joined server
         private async Task UserJoined(SocketGuildUser user)
         {
             //Checks if the message author is not a bot or a webhook
             if (user.IsBot == false && user.IsWebhook == false)
             {
-                await Task.Delay(new TimeSpan(0, 10, 0));
-                await user.SendMessageAsync("Some PM, soon it'll say something!");
+                //Gets the user in a mentionable way
+                string user_mention = user.Mention;
+
+                //Sends the user a welcome message
+                await user.SendMessageAsync("Hi there " + user_mention + ", welcome to the official ParkourFPS Discord server! \nHere you can talk with others about ParkourFPS, talk about game development and play some games with me! \n \nPlease check out the channel " + rules_and_info.Mention + " for all the rules and info you'll need to know. \nYou will have to accept the TOS of Discord and this server by clicking on the check to gain access to the server.");
+
+                //Gets the "New Member" role and give it to the user
+                SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
+                await user.AddRoleAsync(new_member_role);
+            }
+        }
+
+        //On reaction added to message
+        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel messageChannel, SocketReaction reaction)
+        {
+            //Checks if the message is the rules-and-info message
+            if (reaction.MessageId == 746698103356260403)
+            {
+                //Checks if the reaction emote is a :white_check_mark: or :x:
+                if (reaction.Emote.Name == "✅")
+                {
+                    //Gets the user that reacted
+                    ulong user_id = reaction.UserId;
+                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+
+                    //Removes the "New Member" role from the user
+                    SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
+                    await user.RemoveRoleAsync(new_member_role);
+                }
+                else if (reaction.Emote.Name == "❌")
+                {
+                    //Gets the user that reacted
+                    ulong user_id = reaction.UserId;
+                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+
+                    //Adds the "New Member" role to the user
+                    SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
+                    await user.AddRoleAsync(new_member_role);
+                }
+            }
+        }
+
+        //On reaction removed from message
+        private async Task ReactionRemoved(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel messageChannel, SocketReaction reaction)
+        {
+            //Checks if the message is the rules-and-info message
+            if (reaction.MessageId == 746698103356260403)
+            {
+                //Checks if the removed reaction emote is a :white_check_mark: or :x:
+                if (reaction.Emote.Name == "✅")
+                {
+                    //Gets the user that removed the reaction
+                    ulong user_id = reaction.UserId;
+                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+
+                    //Adds the "New Member" role from the user
+                    SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
+                    await user.AddRoleAsync(new_member_role);
+                }
             }
         }
     }
