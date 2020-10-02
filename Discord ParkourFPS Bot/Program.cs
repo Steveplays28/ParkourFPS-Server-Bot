@@ -52,6 +52,11 @@ namespace Discord_ParkourFPS_Bot
         //On message received
         private async Task MessageReceived(SocketMessage message)
         {
+            if(message_lowercase.Contains("you are bad"))
+            {
+                await message.Channel.SendMessageAsync(message_author + "test");
+            }
+            
             //Checks if the message author is not a bot or a webhook
             if (message.Author.IsBot == false && message.Author.IsWebhook == false)
             {
@@ -71,6 +76,7 @@ namespace Discord_ParkourFPS_Bot
                         {
                             await message.Channel.SendMessageAsync("Hello " + message_author + ", soon you'll be able to play a game with me!");
                         }
+                        
                     }
                 }
             }
