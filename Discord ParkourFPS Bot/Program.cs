@@ -88,6 +88,7 @@ namespace Discord_ParkourFPS_Bot
             if (user.IsBot == false && user.IsWebhook == false)
             {
                 await Task.Delay(new TimeSpan(0, 10, 0));
+                await user.SendMessageAsync("Some PM, soon it'll say something!");
             }
         }
     }
