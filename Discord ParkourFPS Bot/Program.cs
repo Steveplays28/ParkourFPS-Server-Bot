@@ -28,9 +28,9 @@ namespace Discord_ParkourFPS_Bot
 
             //Tasks
             client.Log += Log;
+            client.Ready += ClientReady;
             client.MessageReceived += MessageReceived;
             client.UserJoined += UserJoined;
-            client.Ready += ClientReady;
             client.ReactionAdded += ReactionAdded;
             client.ReactionRemoved += ReactionRemoved;
 
@@ -70,24 +70,37 @@ namespace Discord_ParkourFPS_Bot
             //Checks if the message author is not a bot or a webhook
             if (message.Author.IsBot == false && message.Author.IsWebhook == false)
             {
-                //Checks if the channel of the message == bot-games
+                //Checks if the channel of the message is the bot-games channel or the bot-testing channel
                 if (message.Channel.Id == 761286954955309057 || message.Channel.Id == 761284474339721236)
                 {
-                    //Checks if the message contains the prefix
-                    if (message.Content.Contains(Prefix))
+                    //Sets message to lowercase and stores it to message_lowercase
+                    string message_lowercase = message.Content.ToLower();
+
+                    //Gets the message author in a mentionable way
+                    string message_author_mention = message.Author.Mention;
+
+                    //Help command
+                    if (message_lowercase.Contains(Prefix + "help"))
                     {
-                        //Sets message to lowercase and stores it to message_lowercase
-                        string message_lowercase = message.Content.ToLower();
+                        await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", I'm managing role reactions and soon you'll be able to play games with me! \nMore functionality is in development.");
+                    }
 
-                        //Gets the message author in a mentionable way
-                        string message_author_mention = message.Author.Mention;
+                    //Bot mention reply
+                    if (message.Content.Contains(client.CurrentUser.Mention))
+                    {
+                        await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", what can I do for you?");
+                    }
 
-                        //Help command
-                        if (message_lowercase.Contains(Prefix + "help"))
-                        {
-                            await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", soon you'll be able to play a game with me!");
-                        }
+                    //Play snake command
+                    if (message_lowercase.Contains(Prefix + "play snake"))
+                    {
+                        EmbedBuilder snake_game_embed = new EmbedBuilder();
+                        string x = "🟦🟦🟦";
 
+                        snake_game_embed.WithTitle("Snake, WIP");
+                        snake_game_embed.AddField("Snake, WIP", x);
+
+                        await message.Channel.SendMessageAsync(embed: snake_game_embed.Build());
                     }
                 }
             }
@@ -117,7 +130,7 @@ namespace Discord_ParkourFPS_Bot
             //Checks if the message is the rules-and-info message
             if (reaction.MessageId == 746698103356260403)
             {
-                //Checks if the reaction emote is a :white_check_mark: or :x:
+                //Checks if the reaction emote is a :white_check_mark:
                 if (reaction.Emote.Name == "✅")
                 {
                     //Gets the user that reacted
@@ -128,15 +141,21 @@ namespace Discord_ParkourFPS_Bot
                     SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
                     await user.RemoveRoleAsync(new_member_role);
                 }
-                else if (reaction.Emote.Name == "❌")
+            }
+
+            //Checks if the message is the bot-games role message
+            if (reaction.MessageId == 761701551126478849)
+            {
+                //Checks if the reaction emote is a :robot:
+                if (reaction.Emote.Name == "🤖")
                 {
                     //Gets the user that reacted
                     ulong user_id = reaction.UserId;
                     SocketGuildUser user = parkourfps_server.GetUser(user_id);
 
-                    //Adds the "New Member" role to the user
-                    SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
-                    await user.AddRoleAsync(new_member_role);
+                    //Adds the "Bot games" role to the user
+                    SocketRole bot_games = parkourfps_server.GetRole(761700403078889472);
+                    await user.AddRoleAsync(bot_games);
                 }
             }
         }
@@ -147,16 +166,32 @@ namespace Discord_ParkourFPS_Bot
             //Checks if the message is the rules-and-info message
             if (reaction.MessageId == 746698103356260403)
             {
-                //Checks if the removed reaction emote is a :white_check_mark: or :x:
+                //Checks if the removed reaction emote is a :white_check_mark:
                 if (reaction.Emote.Name == "✅")
                 {
                     //Gets the user that removed the reaction
                     ulong user_id = reaction.UserId;
                     SocketGuildUser user = parkourfps_server.GetUser(user_id);
 
-                    //Adds the "New Member" role from the user
+                    //Adds the "New Member" role to the user
                     SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
                     await user.AddRoleAsync(new_member_role);
+                }
+            }
+
+            //Checks if the message is the bot-games role message
+            if (reaction.MessageId == 761701551126478849)
+            {
+                //Checks if the reaction emote is a :robot:
+                if (reaction.Emote.Name == "🤖")
+                {
+                    //Gets the user that reacted
+                    ulong user_id = reaction.UserId;
+                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+
+                    //Removes the "Bot games" role from the user
+                    SocketRole bot_games = parkourfps_server.GetRole(761700403078889472);
+                    await user.RemoveRoleAsync(bot_games);
                 }
             }
         }
