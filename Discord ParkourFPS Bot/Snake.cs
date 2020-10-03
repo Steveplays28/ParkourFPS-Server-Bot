@@ -10,6 +10,9 @@ namespace Discord_ParkourFPS_Bot
         public int Width { get; private set; }
         public string Emoji { get; private set; }
 
+        //2D array
+        public string[,] Array;
+
         public Snake(int height, int width, string emoji)
         {
             if (height < 0)
@@ -24,6 +27,16 @@ namespace Discord_ParkourFPS_Bot
             Height = height;
             Width = width;
             Emoji = emoji;
+
+            Array = new string[width, height];
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    Array[i, j] = emoji;
+                }
+            }
         }
 
         public override string ToString()
@@ -34,7 +47,7 @@ namespace Discord_ParkourFPS_Bot
             {
                 for (int j = 0; j < Width; j++)
                 {
-                    stringBuilder.Append(Emoji);
+                    stringBuilder.Append(Array[i, j]);
                 }
                 stringBuilder.Append(Environment.NewLine);
             }

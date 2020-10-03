@@ -104,6 +104,7 @@ namespace Discord_ParkourFPS_Bot
                         //await message.Channel.SendMessageAsync(embed: snake_game_embed.Build());
 
                         Snake snake_game = new Snake(5, 5, "🟦");
+                        snake_game.Array[0, 0] = "🟩";
                         await message.Channel.SendMessageAsync(snake_game.ToString());
                     }
                 }
