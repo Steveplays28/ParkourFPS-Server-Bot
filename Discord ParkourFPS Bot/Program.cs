@@ -94,13 +94,17 @@ namespace Discord_ParkourFPS_Bot
                     //Play snake command
                     if (message_lowercase.Contains(Prefix + "play snake"))
                     {
-                        EmbedBuilder snake_game_embed = new EmbedBuilder();
-                        string x = "🟦🟦🟦";
+                        //EmbedBuilder snake_game_embed = new EmbedBuilder();
+                        //int x = 5;
+                        //int y = 5;
 
-                        snake_game_embed.WithTitle("Snake, WIP");
-                        snake_game_embed.AddField("Snake, WIP", x);
+                        //snake_game_embed.WithTitle("Snake, WIP");
+                        //snake_game_embed.AddField("Snake, WIP", x);
 
-                        await message.Channel.SendMessageAsync(embed: snake_game_embed.Build());
+                        //await message.Channel.SendMessageAsync(embed: snake_game_embed.Build());
+
+                        Snake snake_game = new Snake(5, 5, "🟦");
+                        await message.Channel.SendMessageAsync(snake_game.ToString());
                     }
                 }
             }
