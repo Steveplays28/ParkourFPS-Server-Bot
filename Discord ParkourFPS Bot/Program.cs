@@ -107,6 +107,11 @@ namespace Discord_ParkourFPS_Bot
                         snake_game.Array[0, 0] = "🟩";
                         await message.Channel.SendMessageAsync(snake_game.ToString());
                     }
+
+                    if (message_lowercase.Contains(Prefix + "snake help"))
+                    {
+
+                    }
                 }
             }
         }
