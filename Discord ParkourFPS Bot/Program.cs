@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-
 namespace Discord_ParkourFPS_Bot
 {
     public class Program
@@ -13,7 +12,9 @@ namespace Discord_ParkourFPS_Bot
         private SocketGuild parkourfps_server;
         private SocketGuildUser steveplays;
         private SocketTextChannel rules_and_info;
-
+        private bool is_playing_snake;
+        private int snake_x = 3;
+        private int snake_y = 3;
         //Main static void
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -54,6 +55,7 @@ namespace Discord_ParkourFPS_Bot
         //On bot ready
         private async Task ClientReady()
         {
+
             //Set bot status
             await client.SetGameAsync("user commands!", streamUrl: "", type: ActivityType.Listening);
             Console.WriteLine("I should've set my status now...");
@@ -90,10 +92,22 @@ namespace Discord_ParkourFPS_Bot
                     {
                         await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", what can I do for you?");
                     }
+                    // if the person is playing snake, then magic and stuff.
+                    if (is_playing_snake == true)
+                    {
+                        Snake snake_game = new Snake(5, 5, "🟦");
+                        snake_game.Array[snake_x, snake_y] = "🟩";
+                        if (message_lowercase.Contains(Prefix + "d"))
+                        {
+                            snake_x += 1;
 
+                        }
+                        await message.Channel.SendMessageAsync(snake_game.ToString());
+                    }
                     //Play snake command
                     if (message_lowercase.Contains(Prefix + "play snake"))
                     {
+
                         //EmbedBuilder snake_game_embed = new EmbedBuilder();
                         //int x = 5;
                         //int y = 5;
@@ -102,14 +116,10 @@ namespace Discord_ParkourFPS_Bot
                         //snake_game_embed.AddField("Snake, WIP", x);
 
                         //await message.Channel.SendMessageAsync(embed: snake_game_embed.Build());
-
+                        is_playing_snake = true;
                         Snake snake_game = new Snake(5, 5, "🟦");
-                        snake_game.Array[0, 0] = "🟩";
+                        snake_game.Array[snake_x, snake_y] = "🟩";
                         await message.Channel.SendMessageAsync(snake_game.ToString());
-                    }
-
-                    if (message_lowercase.Contains(Prefix + "snake help"))
-                    {
 
                     }
                 }
