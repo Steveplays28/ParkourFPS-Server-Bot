@@ -16,8 +16,10 @@ namespace Discord_ParkourFPS_Bot
         private SocketGuildUser steveplays;
         private SocketTextChannel rules_and_info;
         private bool is_playing_snake;
-        private int snake_x;
-        private int snake_y;
+        private int snake_line;
+        private int snake_column;
+        private Snake snake_game;
+
         //Main static void
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -95,40 +97,12 @@ namespace Discord_ParkourFPS_Bot
                     {
                         await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", what can I do for you?");
                     }
-                    // if the person is playing snake, then magic and stuff.
-                    if (is_playing_snake == true)
-                    {
-                        if (message_lowercase.Contains(Prefix + "w") || message_lowercase.Contains(Prefix + "a") || message_lowercase.Contains(Prefix + "s") || message_lowercase.Contains(Prefix + "d"))
-                        {
-                            if (message_lowercase.Contains(Prefix + "d"))
-                            {
-                                snake_x += 1;
 
-
-                            }
-                            if (message_lowercase.Contains(Prefix + "w")) 
-                            {
-                                snake_y -= 1;
-                            }
-                            if (message_lowercase.Contains(Prefix + "a"))
-                            {
-                                snake_x -= 1;
-                            }
-                            if (message_lowercase.Contains(Prefix + "s"))
-                            {
-                                snake_y += 1;
-                            }
-
-                            Snake snake_game = new Snake(5, 5, "🟦");
-                            snake_game.Array[snake_y, snake_x] = "🟩";
-                            await message.Channel.SendMessageAsync(snake_game.ToString());
-                        }
-                    }
                     //Play snake command
                     if (message_lowercase.Contains(Prefix + "play snake"))
                     {
-                        snake_x = r.Next(5);
-                        snake_y = r.Next(5);
+                        snake_line = r.Next(5);
+                        snake_column = r.Next(5);
 
                         //EmbedBuilder snake_game_embed = new EmbedBuilder();
                         //int x = 5;
@@ -139,10 +113,43 @@ namespace Discord_ParkourFPS_Bot
 
                         //await message.Channel.SendMessageAsync(embed: snake_game_embed.Build());
                         is_playing_snake = true;
-                        Snake snake_game = new Snake(5, 5, "🟦");
-                        snake_game.Array[snake_x, snake_y] = "🟩";
+                        snake_game = new Snake(10, 10, "🟦");
+                        snake_game.Array[snake_line, snake_column] = "🟩";
                         await message.Channel.SendMessageAsync(snake_game.ToString());
 
+                    }
+
+                    // if the person is playing snake, then magic and stuff.
+                    if (is_playing_snake == true)
+                    {
+                        if (message_lowercase.Contains(Prefix + "w"))
+                        {
+                            snake_line -= 1;
+                            snake_game.Array[snake_line + 1, snake_column] = snake_game.Emoji;
+                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
+                        }
+                        if (message_lowercase.Contains(Prefix + "a"))
+                        {
+                            snake_column -= 1;
+                            snake_game.Array[snake_line, snake_column + 1] = snake_game.Emoji;
+                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
+                        }
+                        if (message_lowercase.Contains(Prefix + "s"))
+                        {
+                            snake_line += 1;
+                            snake_game.Array[snake_line - 1, snake_column] = snake_game.Emoji;
+                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
+                        }
+                        if (message_lowercase.Contains(Prefix + "d"))
+                        {
+                            snake_column += 1;
+                            snake_game.Array[snake_line, snake_column - 1] = snake_game.Emoji;
+                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
+                        }
                     }
                 }
             }

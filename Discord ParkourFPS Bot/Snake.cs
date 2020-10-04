@@ -28,7 +28,7 @@ namespace Discord_ParkourFPS_Bot
             Width = width;
             Emoji = emoji;
 
-            Array = new string[width, height];
+            Array = new string[height, width];
 
             for (int i = 0; i < height; i++)
             {
