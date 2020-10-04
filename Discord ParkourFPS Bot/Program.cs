@@ -1,20 +1,23 @@
 ﻿using System;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+
 namespace Discord_ParkourFPS_Bot
 {
     public class Program
     {
         //Global variables
+        Random r = new Random();
         private DiscordSocketClient client;
         private readonly string Prefix = "~";
         private SocketGuild parkourfps_server;
         private SocketGuildUser steveplays;
         private SocketTextChannel rules_and_info;
         private bool is_playing_snake;
-        private int snake_x = 3;
-        private int snake_y = 3;
+        private int snake_x;
+        private int snake_y;
         //Main static void
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -95,18 +98,37 @@ namespace Discord_ParkourFPS_Bot
                     // if the person is playing snake, then magic and stuff.
                     if (is_playing_snake == true)
                     {
-                        Snake snake_game = new Snake(5, 5, "🟦");
-                        snake_game.Array[snake_x, snake_y] = "🟩";
-                        if (message_lowercase.Contains(Prefix + "d"))
+                        if (message_lowercase.Contains(Prefix + "w") || message_lowercase.Contains(Prefix + "a") || message_lowercase.Contains(Prefix + "s") || message_lowercase.Contains(Prefix + "d"))
                         {
-                            snake_x += 1;
+                            if (message_lowercase.Contains(Prefix + "d"))
+                            {
+                                snake_x += 1;
 
+
+                            }
+                            if (message_lowercase.Contains(Prefix + "w")) 
+                            {
+                                snake_y -= 1;
+                            }
+                            if (message_lowercase.Contains(Prefix + "a"))
+                            {
+                                snake_x -= 1;
+                            }
+                            if (message_lowercase.Contains(Prefix + "s"))
+                            {
+                                snake_y += 1;
+                            }
+
+                            Snake snake_game = new Snake(5, 5, "🟦");
+                            snake_game.Array[snake_y, snake_x] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
-                        await message.Channel.SendMessageAsync(snake_game.ToString());
                     }
                     //Play snake command
                     if (message_lowercase.Contains(Prefix + "play snake"))
                     {
+                        snake_x = r.Next(5);
+                        snake_y = r.Next(5);
 
                         //EmbedBuilder snake_game_embed = new EmbedBuilder();
                         //int x = 5;
