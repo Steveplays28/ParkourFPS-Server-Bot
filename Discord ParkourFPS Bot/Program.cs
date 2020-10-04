@@ -122,6 +122,7 @@ namespace Discord_ParkourFPS_Bot
                     // if the person is playing snake, then magic and stuff.
                     if (is_playing_snake == true)
                     {
+                        //Move snake up
                         if (message_lowercase.Contains(Prefix + "w"))
                         {
                             snake_line -= 1;
@@ -129,6 +130,8 @@ namespace Discord_ParkourFPS_Bot
                             snake_game.Array[snake_line, snake_column] = "🟩";
                             await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
+
+                        //Move snake left
                         if (message_lowercase.Contains(Prefix + "a"))
                         {
                             snake_column -= 1;
@@ -136,6 +139,8 @@ namespace Discord_ParkourFPS_Bot
                             snake_game.Array[snake_line, snake_column] = "🟩";
                             await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
+
+                        //Move snake down
                         if (message_lowercase.Contains(Prefix + "s"))
                         {
                             snake_line += 1;
@@ -143,6 +148,8 @@ namespace Discord_ParkourFPS_Bot
                             snake_game.Array[snake_line, snake_column] = "🟩";
                             await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
+
+                        //Move snake right
                         if (message_lowercase.Contains(Prefix + "d"))
                         {
                             snake_column += 1;
