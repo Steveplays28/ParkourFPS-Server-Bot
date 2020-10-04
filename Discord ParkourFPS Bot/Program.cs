@@ -101,20 +101,14 @@ namespace Discord_ParkourFPS_Bot
                     //Play snake command
                     if (message_lowercase.Contains(Prefix + "play snake"))
                     {
+                        //Random snake position
                         snake_line = r.Next(5);
                         snake_column = r.Next(5);
 
-                        //EmbedBuilder snake_game_embed = new EmbedBuilder();
-                        //int x = 5;
-                        //int y = 5;
-
-                        //snake_game_embed.WithTitle("Snake, WIP");
-                        //snake_game_embed.AddField("Snake, WIP", x);
-
-                        //await message.Channel.SendMessageAsync(embed: snake_game_embed.Build());
+                        //Start new game of snake
                         is_playing_snake = true;
-                        snake_game = new Snake(10, 10, "🟦");
-                        snake_game.Array[snake_line, snake_column] = "🟩";
+                        snake_game = new Snake(10, 10);
+                        snake_game.canvas_array[snake_line, snake_column] = snake_game.snake_emoji;
                         await message.Channel.SendMessageAsync(snake_game.ToString());
 
                     }
@@ -126,8 +120,8 @@ namespace Discord_ParkourFPS_Bot
                         if (message_lowercase.Contains(Prefix + "w"))
                         {
                             snake_line -= 1;
-                            snake_game.Array[snake_line + 1, snake_column] = snake_game.Emoji;
-                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            snake_game.canvas_array[snake_line + 1, snake_column] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
                             await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
 
@@ -135,8 +129,8 @@ namespace Discord_ParkourFPS_Bot
                         if (message_lowercase.Contains(Prefix + "a"))
                         {
                             snake_column -= 1;
-                            snake_game.Array[snake_line, snake_column + 1] = snake_game.Emoji;
-                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            snake_game.canvas_array[snake_line, snake_column + 1] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
                             await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
 
@@ -144,8 +138,8 @@ namespace Discord_ParkourFPS_Bot
                         if (message_lowercase.Contains(Prefix + "s"))
                         {
                             snake_line += 1;
-                            snake_game.Array[snake_line - 1, snake_column] = snake_game.Emoji;
-                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            snake_game.canvas_array[snake_line - 1, snake_column] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
                             await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
 
@@ -153,8 +147,8 @@ namespace Discord_ParkourFPS_Bot
                         if (message_lowercase.Contains(Prefix + "d"))
                         {
                             snake_column += 1;
-                            snake_game.Array[snake_line, snake_column - 1] = snake_game.Emoji;
-                            snake_game.Array[snake_line, snake_column] = "🟩";
+                            snake_game.canvas_array[snake_line, snake_column - 1] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
                             await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
                     }

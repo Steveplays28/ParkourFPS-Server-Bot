@@ -6,48 +6,57 @@ namespace Discord_ParkourFPS_Bot
 {
     public class Snake
     {
-        public int Height { get; private set; }
-        public int Width { get; private set; }
-        public string Emoji { get; private set; }
+        //Snake game default variables
+        public int canvas_height;
+        public int canvas_width;
+        public string canvas_emoji = "🟦";
+        public string snake_emoji = "🟩";
 
-        //2D array
-        public string[,] Array;
+        //2D array for width and height of the canvas
+        public string[,] canvas_array;
 
-        public Snake(int height, int width, string emoji)
+        //2D array for all snake positions
+        public string[,] snake_positions_array;
+
+        //Snake game class
+        public Snake(int Canvas_Height, int Canvas_Width)
         {
-            if (height < 0)
+            //Check if canvas height and canvas with are less than 0, if so, throw an error
+            if (Canvas_Height < 0)
             {
-                throw new ArgumentException(nameof(height));
+                throw new ArgumentException(nameof(canvas_height));
             }
-            if (width < 0)
+            if (Canvas_Width < 0)
             {
-                throw new ArgumentException(nameof(width));
+                throw new ArgumentException(nameof(canvas_width));
             }
 
-            Height = height;
-            Width = width;
-            Emoji = emoji;
+            //Set canvas width and canvas height
+            canvas_height = Canvas_Height;
+            canvas_width = Canvas_Width;
 
-            Array = new string[height, width];
+            //New canvas array
+            canvas_array = new string[canvas_height, canvas_width];
 
-            for (int i = 0; i < height; i++)
+            for (int i = 0; i < canvas_height; i++)
             {
-                for (int j = 0; j < width; j++)
+                for (int j = 0; j < canvas_width; j++)
                 {
-                    Array[i, j] = emoji;
+                    canvas_array[i, j] = canvas_emoji;
                 }
             }
         }
 
+        //Canvas array to string
         public override string ToString()
         {
             var stringBuilder = new StringBuilder();
 
-            for (int i = 0; i < Height; i++)
+            for (int i = 0; i < canvas_height; i++)
             {
-                for (int j = 0; j < Width; j++)
+                for (int j = 0; j < canvas_width; j++)
                 {
-                    stringBuilder.Append(Array[i, j]);
+                    stringBuilder.Append(canvas_array[i, j]);
                 }
                 stringBuilder.Append(Environment.NewLine);
             }
