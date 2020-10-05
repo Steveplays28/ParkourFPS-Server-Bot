@@ -19,7 +19,6 @@ namespace Discord_ParkourFPS_Bot
         private int snake_line;
         private int snake_column;
         private Snake snake_game;
-        private SocketMessage _message;
 
         //Main static void
         static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
@@ -101,55 +100,60 @@ namespace Discord_ParkourFPS_Bot
 
                     //Play snake command
                     if (message_lowercase.Contains(Prefix + "play snake"))
-                    {                        
+                    {
+                        //Random snake position
+                        snake_line = r.Next(5);
+                        snake_column = r.Next(5);
+
                         //Start new game of snake
+                        is_playing_snake = true;
                         snake_game = new Snake(10, 10);
-                        snake_game.SnakeChanged += Snake_game_SnakeChanged;
-                        await message.Channel.SendMessageAsync(snake_game.Initialize());
+                        snake_game.canvas_array[snake_line, snake_column] = snake_game.snake_emoji;
+                        await message.Channel.SendMessageAsync(snake_game.ToString());
+
                     }
 
                     // if the person is playing snake, then magic and stuff.
-                    if ((bool)snake_game?.IsPlaying)
+                    if (is_playing_snake == true)
                     {
-                        _message = message;
-
                         //Move snake up
                         if (message_lowercase.Contains(Prefix + "w"))
                         {
-                            //snake_line -= 1;
-                            //snake_game.canvas_array[snake_line + 1, snake_column] = snake_game.canvas_emoji;
-                            //snake_game.canvas_array[snake_line, snake_column] = "🟩";
-                            //await message.Channel.SendMessageAsync(snake_game.ToString());
+                            snake_line -= 1;
+                            snake_game.canvas_array[snake_line + 1, snake_column] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
 
                         //Move snake left
                         if (message_lowercase.Contains(Prefix + "a"))
                         {
-                            snake_game.GoLeft();
+                            snake_column -= 1;
+                            snake_game.canvas_array[snake_line, snake_column + 1] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
 
                         //Move snake down
                         if (message_lowercase.Contains(Prefix + "s"))
                         {
-                            //snake_line += 1;
-                            //snake_game.canvas_array[snake_line - 1, snake_column] = snake_game.canvas_emoji;
-                            //snake_game.canvas_array[snake_line, snake_column] = "🟩";
-                            //await message.Channel.SendMessageAsync(snake_game.ToString());
+                            snake_line += 1;
+                            snake_game.canvas_array[snake_line - 1, snake_column] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
 
                         //Move snake right
                         if (message_lowercase.Contains(Prefix + "d"))
                         {
-                            snake_game.GoRight();
+                            snake_column += 1;
+                            snake_game.canvas_array[snake_line, snake_column - 1] = snake_game.canvas_emoji;
+                            snake_game.canvas_array[snake_line, snake_column] = "🟩";
+                            await message.Channel.SendMessageAsync(snake_game.ToString());
                         }
                     }
                 }
             }
-        }
-
-        private async void Snake_game_SnakeChanged(object sender, EventArgs e)
-        {
-            await _message.Channel.SendMessageAsync(snake_game.ToString());
         }
 
         //On user joined server
