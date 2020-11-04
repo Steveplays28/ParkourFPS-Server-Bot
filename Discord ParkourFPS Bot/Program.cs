@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text.Unicode;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -35,13 +38,14 @@ namespace Discord_ParkourFPS_Bot
             //Tasks
             client.Log += Log;
             client.Ready += ClientReady;
+            client.LoggedOut += ClientStop;
             client.MessageReceived += MessageReceived;
             client.UserJoined += UserJoined;
             client.ReactionAdded += ReactionAdded;
             client.ReactionRemoved += ReactionRemoved;
 
             //Store bot token
-            Environment.SetEnvironmentVariable("DiscordToken", "NzYxMTg2MjM1MjYyOTU5NjQ5.X3W77A.0Lhchw_1BFU0DRsRzz8X_KCQ62E");
+            Environment.SetEnvironmentVariable("DiscordToken", "NzYxMTg2MjM1MjYyOTU5NjQ5.X3W77A.VPEBmiA4yv0q1D6mxMyUv7xXfOk");
 
             //Start initialisation with bot token
             await client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DiscordToken"));
@@ -71,35 +75,79 @@ namespace Discord_ParkourFPS_Bot
             rules_and_info = parkourfps_server.GetTextChannel(746697885248258078);
         }
 
+        private async Task ClientStop()
+        {
+            await client.StopAsync();
+        }
+
         //On message received
         private async Task MessageReceived(SocketMessage message)
         {
             //Checks if the message author is not a bot or a webhook
             if (message.Author.IsBot == false && message.Author.IsWebhook == false)
             {
+                //Sets message to lowercase and stores it to messageLowercase
+                string messageLowercase = message.Content.ToLower();
+
+                //Gets the message author in a mentionable way
+                string messageAuthorMention = message.Author.Mention;
+
+                //Help command
+                if (messageLowercase == Prefix + "help")
+                {
+                    await message.Channel.SendMessageAsync("Hello " + messageAuthorMention + ", I'm managing role reactions and soon you'll be able to play games with me! \nMore functionality is in development.");
+                }
+
+                //Bot mention reply
+                if (messageLowercase == client.CurrentUser.Mention)
+                {
+                    await message.Channel.SendMessageAsync("Hello " + messageAuthorMention + ", what can I do for you?");
+                }
+
+                //Move command
+                if (messageLowercase.StartsWith(Prefix) && messageLowercase.Contains("move") && messageLowercase.Contains("#"))
+                {
+                    //Extract ID's
+                    string linkedGuildIdString = messageLowercase.Split('/', '/')[4];
+                    string linkedChannelIdString = messageLowercase.Split('/', '/')[5];
+                    string linkedMessageIdString = messageLowercase.Split('/', '<')[6];
+                    linkedMessageIdString = linkedMessageIdString.Remove(linkedMessageIdString.Length - 1);
+                    string otherChannelIdString = messageLowercase.Split('#', '>')[1];
+
+                    //Convert ID's to ulong
+                    ulong linkedGuildId = Convert.ToUInt64(linkedGuildIdString);
+                    ulong linkedChannelId = Convert.ToUInt64(linkedChannelIdString);
+                    ulong linkedMessageId = Convert.ToUInt64(linkedMessageIdString);
+                    ulong otherChannelId = Convert.ToUInt64(otherChannelIdString);
+
+                    //Get linked message
+                    IMessage linkedMessage = await client.GetGuild(linkedGuildId).GetTextChannel(linkedChannelId).GetMessageAsync(linkedMessageId);
+                    string linkedMessageString = linkedMessage.ToString();
+
+                    //Get other channel
+                    SocketTextChannel otherChannel = client.GetGuild(linkedGuildId).GetTextChannel(otherChannelId);
+
+                    //Send new message in other channel
+                    IMessage v = await otherChannel.SendMessageAsync(linkedMessage.Author.Mention + " said: \n> " + linkedMessageString);
+
+                    //Delete linked message
+                    await client.GetGuild(linkedGuildId).GetTextChannel(linkedChannelId).DeleteMessageAsync(linkedMessageId);
+
+                    //Remove command invocation
+                    await message.DeleteAsync();
+                    //Success message
+                    IMessage successMessage = await message.Channel.SendMessageAsync("Message moved successfully!");
+
+                    //Remove success message
+                    await Task.Delay(5000);
+                    await successMessage.DeleteAsync();
+                }
+
                 //Checks if the channel of the message is the bot-games channel or the bot-testing channel
                 if (message.Channel.Id == 761286954955309057 || message.Channel.Id == 761284474339721236)
                 {
-                    //Sets message to lowercase and stores it to message_lowercase
-                    string message_lowercase = message.Content.ToLower();
-
-                    //Gets the message author in a mentionable way
-                    string message_author_mention = message.Author.Mention;
-
-                    //Help command
-                    if (message_lowercase.Contains(Prefix + "help"))
-                    {
-                        await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", I'm managing role reactions and soon you'll be able to play games with me! \nMore functionality is in development.");
-                    }
-
-                    //Bot mention reply
-                    if (message.Content.Contains(client.CurrentUser.Mention))
-                    {
-                        await message.Channel.SendMessageAsync("Hello " + message_author_mention + ", what can I do for you?");
-                    }
-
                     //Play snake command
-                    if (message_lowercase.Contains(Prefix + "play snake"))
+                    if (messageLowercase == Prefix + "play snake")
                     {
                         //Random snake position
                         snake_line = r.Next(5);
@@ -117,7 +165,7 @@ namespace Discord_ParkourFPS_Bot
                     if (is_playing_snake == true)
                     {
                         //Move snake up
-                        if (message_lowercase.Contains(Prefix + "w"))
+                        if (messageLowercase == Prefix + "w")
                         {
                             snake_line -= 1;
                             snake_game.canvas_array[snake_line + 1, snake_column] = snake_game.canvas_emoji;
@@ -126,7 +174,7 @@ namespace Discord_ParkourFPS_Bot
                         }
 
                         //Move snake left
-                        if (message_lowercase.Contains(Prefix + "a"))
+                        if (messageLowercase == Prefix + "a")
                         {
                             snake_column -= 1;
                             snake_game.canvas_array[snake_line, snake_column + 1] = snake_game.canvas_emoji;
@@ -135,7 +183,7 @@ namespace Discord_ParkourFPS_Bot
                         }
 
                         //Move snake down
-                        if (message_lowercase.Contains(Prefix + "s"))
+                        if (messageLowercase == Prefix + "s")
                         {
                             snake_line += 1;
                             snake_game.canvas_array[snake_line - 1, snake_column] = snake_game.canvas_emoji;
@@ -144,7 +192,7 @@ namespace Discord_ParkourFPS_Bot
                         }
 
                         //Move snake right
-                        if (message_lowercase.Contains(Prefix + "d"))
+                        if (messageLowercase == Prefix + "d")
                         {
                             snake_column += 1;
                             snake_game.canvas_array[snake_line, snake_column - 1] = snake_game.canvas_emoji;
