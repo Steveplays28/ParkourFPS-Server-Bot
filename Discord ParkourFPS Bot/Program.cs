@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text.Unicode;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -14,10 +10,9 @@ namespace Discord_ParkourFPS_Bot
         //Global variables
         Random r = new Random();
         private DiscordSocketClient client;
-        private readonly string Prefix = "~";
-        private SocketGuild parkourfps_server;
-        private SocketGuildUser steveplays;
-        private SocketTextChannel rules_and_info;
+        private readonly string prefix = "~";
+        private SocketGuild parkourfpsServer;
+        private SocketTextChannel rulesAndInfoChannel;
         private bool is_playing_snake;
         private int snake_line;
         private int snake_column;
@@ -38,7 +33,6 @@ namespace Discord_ParkourFPS_Bot
             //Tasks
             client.Log += Log;
             client.Ready += ClientReady;
-            client.LoggedOut += ClientStop;
             client.MessageReceived += MessageReceived;
             client.UserJoined += UserJoined;
             client.ReactionAdded += ReactionAdded;
@@ -70,14 +64,8 @@ namespace Discord_ParkourFPS_Bot
             Console.WriteLine("I should've set my status now...");
 
             //Set global variables
-            parkourfps_server = client.GetGuild(746681304111906867);
-            steveplays = parkourfps_server.GetUser(746088882461737111);
-            rules_and_info = parkourfps_server.GetTextChannel(746697885248258078);
-        }
-
-        private async Task ClientStop()
-        {
-            await client.StopAsync();
+            parkourfpsServer = client.GetGuild(746681304111906867);
+            rulesAndInfoChannel = parkourfpsServer.GetTextChannel(746697885248258078);
         }
 
         //On message received
@@ -93,7 +81,7 @@ namespace Discord_ParkourFPS_Bot
                 string messageAuthorMention = message.Author.Mention;
 
                 //Help command
-                if (messageLowercase == Prefix + "help")
+                if (messageLowercase == prefix + "help")
                 {
                     await message.Channel.SendMessageAsync("Hello " + messageAuthorMention + ", I'm managing role reactions and soon you'll be able to play games with me! \nMore functionality is in development.");
                 }
@@ -105,7 +93,7 @@ namespace Discord_ParkourFPS_Bot
                 }
 
                 //Move command
-                if (messageLowercase.StartsWith(Prefix) && messageLowercase.Contains("move") && messageLowercase.Contains("#"))
+                if (messageLowercase.StartsWith(prefix) && messageLowercase.Contains("move") && messageLowercase.Contains("#"))
                 {
                     //Extract ID's
                     string linkedGuildIdString = messageLowercase.Split('/', '/')[4];
@@ -128,7 +116,7 @@ namespace Discord_ParkourFPS_Bot
                     SocketTextChannel otherChannel = client.GetGuild(linkedGuildId).GetTextChannel(otherChannelId);
 
                     //Send new message in other channel
-                    IMessage v = await otherChannel.SendMessageAsync(linkedMessage.Author.Mention + " said: \n> " + linkedMessageString);
+                    IMessage v = await otherChannel.SendMessageAsync(linkedMessage.Author.Username + " said: \n> " + linkedMessageString);
 
                     //Delete linked message
                     await client.GetGuild(linkedGuildId).GetTextChannel(linkedChannelId).DeleteMessageAsync(linkedMessageId);
@@ -147,7 +135,7 @@ namespace Discord_ParkourFPS_Bot
                 if (message.Channel.Id == 761286954955309057 || message.Channel.Id == 761284474339721236)
                 {
                     //Play snake command
-                    if (messageLowercase == Prefix + "play snake")
+                    if (messageLowercase == prefix + "play snake")
                     {
                         //Random snake position
                         snake_line = r.Next(5);
@@ -165,7 +153,7 @@ namespace Discord_ParkourFPS_Bot
                     if (is_playing_snake == true)
                     {
                         //Move snake up
-                        if (messageLowercase == Prefix + "w")
+                        if (messageLowercase == prefix + "w")
                         {
                             snake_line -= 1;
                             snake_game.canvas_array[snake_line + 1, snake_column] = snake_game.canvas_emoji;
@@ -174,7 +162,7 @@ namespace Discord_ParkourFPS_Bot
                         }
 
                         //Move snake left
-                        if (messageLowercase == Prefix + "a")
+                        if (messageLowercase == prefix + "a")
                         {
                             snake_column -= 1;
                             snake_game.canvas_array[snake_line, snake_column + 1] = snake_game.canvas_emoji;
@@ -183,7 +171,7 @@ namespace Discord_ParkourFPS_Bot
                         }
 
                         //Move snake down
-                        if (messageLowercase == Prefix + "s")
+                        if (messageLowercase == prefix + "s")
                         {
                             snake_line += 1;
                             snake_game.canvas_array[snake_line - 1, snake_column] = snake_game.canvas_emoji;
@@ -192,7 +180,7 @@ namespace Discord_ParkourFPS_Bot
                         }
 
                         //Move snake right
-                        if (messageLowercase == Prefix + "d")
+                        if (messageLowercase == prefix + "d")
                         {
                             snake_column += 1;
                             snake_game.canvas_array[snake_line, snake_column - 1] = snake_game.canvas_emoji;
@@ -201,6 +189,17 @@ namespace Discord_ParkourFPS_Bot
                         }
                     }
                 }
+
+                //if (message.Channel.Id == 789271453362552883)
+                //{
+                //    var x = message.Channel.GetMessagesAsync(2, CacheMode.AllowDownload);
+                    
+
+                //    if (GetDamerauLevenshteinDistance(s, message) > 20)
+                //    {
+                //        await message.Channel.SendMessageAsync("Heh, a chain breaker, pathetic. \nThe ```" + message.Content + "``` chain was {x} messages long. \n \nGG.");
+                //    }
+                //}
             }
         }
 
@@ -214,10 +213,10 @@ namespace Discord_ParkourFPS_Bot
                 string user_mention = user.Mention;
 
                 //Sends the user a welcome message
-                await user.SendMessageAsync("Hi there " + user_mention + ", welcome to the official ParkourFPS Discord server! \nHere you can talk with others about ParkourFPS, talk about game development and play some games with me! \n \nPlease check out the channel " + rules_and_info.Mention + " for all the rules and info you'll need to know. \nYou will have to accept the TOS of Discord and this server by clicking on the check to gain access to the server.");
+                await user.SendMessageAsync("Hi there " + user_mention + ", welcome to the official ParkourFPS Discord server! \nHere you can talk with others about ParkourFPS, talk about game development and play some games with me! \n \nPlease check out the channel " + rulesAndInfoChannel.Mention + " for all the rules and info you'll need to know. \nYou will have to accept the TOS of Discord and this server by clicking on the check to gain access to the server.");
 
                 //Gets the "New Member" role and give it to the user
-                SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
+                SocketRole new_member_role = parkourfpsServer.GetRole(777823510072131615);
                 await user.AddRoleAsync(new_member_role);
             }
         }
@@ -233,10 +232,10 @@ namespace Discord_ParkourFPS_Bot
                 {
                     //Gets the user that reacted
                     ulong user_id = reaction.UserId;
-                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+                    SocketGuildUser user = parkourfpsServer.GetUser(user_id);
 
                     //Removes the "New Member" role from the user
-                    SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
+                    SocketRole new_member_role = parkourfpsServer.GetRole(761633924220190732);
                     await user.RemoveRoleAsync(new_member_role);
                 }
             }
@@ -249,10 +248,10 @@ namespace Discord_ParkourFPS_Bot
                 {
                     //Gets the user that reacted
                     ulong user_id = reaction.UserId;
-                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+                    SocketGuildUser user = parkourfpsServer.GetUser(user_id);
 
                     //Adds the "Bot games" role to the user
-                    SocketRole bot_games = parkourfps_server.GetRole(761700403078889472);
+                    SocketRole bot_games = parkourfpsServer.GetRole(761700403078889472);
                     await user.AddRoleAsync(bot_games);
                 }
             }
@@ -269,10 +268,10 @@ namespace Discord_ParkourFPS_Bot
                 {
                     //Gets the user that removed the reaction
                     ulong user_id = reaction.UserId;
-                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+                    SocketGuildUser user = parkourfpsServer.GetUser(user_id);
 
                     //Adds the "New Member" role to the user
-                    SocketRole new_member_role = parkourfps_server.GetRole(761633924220190732);
+                    SocketRole new_member_role = parkourfpsServer.GetRole(761633924220190732);
                     await user.AddRoleAsync(new_member_role);
                 }
             }
@@ -285,13 +284,73 @@ namespace Discord_ParkourFPS_Bot
                 {
                     //Gets the user that reacted
                     ulong user_id = reaction.UserId;
-                    SocketGuildUser user = parkourfps_server.GetUser(user_id);
+                    SocketGuildUser user = parkourfpsServer.GetUser(user_id);
 
                     //Removes the "Bot games" role from the user
-                    SocketRole bot_games = parkourfps_server.GetRole(761700403078889472);
+                    SocketRole bot_games = parkourfpsServer.GetRole(761700403078889472);
                     await user.RemoveRoleAsync(bot_games);
                 }
             }
+        }
+
+        public static int GetDamerauLevenshteinDistance(string s, string t)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                throw new ArgumentNullException(s, "String Cannot Be Null Or Empty");
+            }
+
+            if (string.IsNullOrEmpty(t))
+            {
+                throw new ArgumentNullException(t, "String Cannot Be Null Or Empty");
+            }
+
+            int n = s.Length; // length of s
+            int m = t.Length; // length of t
+
+            if (n == 0)
+            {
+                return m;
+            }
+
+            if (m == 0)
+            {
+                return n;
+            }
+
+            int[] p = new int[n + 1]; //'previous' cost array, horizontally
+            int[] d = new int[n + 1]; // cost array, horizontally
+
+            // indexes into strings s and t
+            int i; // iterates through s
+            int j; // iterates through t
+
+            for (i = 0; i <= n; i++)
+            {
+                p[i] = i;
+            }
+
+            for (j = 1; j <= m; j++)
+            {
+                char tJ = t[j - 1]; // jth character of t
+                d[0] = j;
+
+                for (i = 1; i <= n; i++)
+                {
+                    int cost = s[i - 1] == tJ ? 0 : 1; // cost
+                                                       // minimum of cell to the left+1, to the top+1, diagonally left and up +cost                
+                    d[i] = Math.Min(Math.Min(d[i - 1] + 1, p[i] + 1), p[i - 1] + cost);
+                }
+
+                // copy current distance counts to 'previous row' distance counts
+                int[] dPlaceholder = p; //placeholder to assist in swapping p and d
+                p = d;
+                d = dPlaceholder;
+            }
+
+            // our last action in the above loop was to switch d and p, so p now 
+            // actually has the most recent cost counts
+            return p[n];
         }
     }
 }
