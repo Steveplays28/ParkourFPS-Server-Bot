@@ -1,3 +1,3 @@
 # ParkourFPS Server Bot
  
-The official ParkourFPS server bot, you'll soon be able to play games with him!
+My Discord server's bot, made in C#. (V1, ABANDONED)
