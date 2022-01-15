@@ -1,3 +1,3 @@
 # ParkourFPS Server Bot
  
-My Discord server's bot, made in C#. (V1, ABANDONED)
+My Discord server's bot, made in C#. (Iteration 1, ABANDONED)
